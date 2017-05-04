@@ -141,9 +141,9 @@ class colorIndex(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		
 class ServerConnection(Protocol):
-	def __init__(self, addr, connection):
-		self.addr=addr
-		self.connection=connection
+	#def __init__(self, addr, connection):
+	#	self.addr=addr
+	#	self.connection=connection
 
 	def connectionMade(self):
 		print( 'connection made')
@@ -159,25 +159,29 @@ class ServerConnection(Protocol):
 			pass
 
 class ServerConnectionFactory(ClientFactory):
-	def __init__(self, connection):
-		self.connection=connection
+	def __init__(self):
+                self.myconn=ServerConnection()
+		#self.connection=connection
 
 	def buildProtocol(self, addr):
-		return ServerConnection(addr, self.connection)
+		#return ServerConnection(addr, self.connection)
+                return self.myconn
 
 class Connections(object):
 	def run(self):
-		reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory(self))
+		reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
 		reactor.run()
 
 	
 
 if __name__ == "__main__":
-	gs = gameSpace()
-	#s=ship(gs)
-	gs.run()
-	#s = ship(gs)
-	connection=Connections()
-	connection.run()
+    gs = gameSpace()
+    #s=ship(gs)
+    gs.run()
+    #s = ship(gs)
+    #connection=Connections()
+    #connection.run()
+    reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
+    reactor.run()
 	
 		

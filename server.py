@@ -11,9 +11,9 @@ clientsConnected=[]
 numberOfClients=1;
 
 class ClientConnection(Protocol):
-    def __init__(self, addr, connection):
-        self.addr=addr
-        self.connection=connection
+    #def __init__(self, addr, connection):
+     #   self.addr=addr
+      #  self.connection=connection
 
     def connectionMade(self):
         self.clientID=numberOfClients
@@ -35,11 +35,13 @@ class ClientConnection(Protocol):
         print self.clientID, ' quit'
 
 class ClientConnectionFactory(Factory):
-    def __init__(self, connection):
-        self.connection=connection
+    def __init__(self):
+        #self.connection=connection
+        self.myconn=ClientConnection()
 
     def buildProtocol(self, addr):
-        return ClientConnection(addr, self.connection)
+        #return ClientConnection(addr, self.connection)
+        return self.myconn
 
 #class for instantiating connection
 class Connections(object):
@@ -48,5 +50,7 @@ class Connections(object):
         reactor.run()
 
 if __name__=='__main__':
-    connection=Connections()
-    connection.run()
+    #connection=Connections()
+    #connection.run()
+    reactor.listenTCP(40043, ClientConnectionFactory())
+    reactor.run()
