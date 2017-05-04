@@ -6,9 +6,10 @@
 from twisted.internet.protocol import Factory
 from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
+from itertools import count
 
 clientsConnected=[]
-numberOfClients=1;
+numberOfClients=count(1)
 
 class ClientConnection(Protocol):
     #def __init__(self, addr, connection):
@@ -16,8 +17,7 @@ class ClientConnection(Protocol):
       #  self.connection=connection
 
     def connectionMade(self):
-        self.clientID=numberOfClients
-        numberOfClients=numberOfClients+1
+        self.clientID=numberOfClients.next()
         clientsConnected.append(self)
         print 'client ', self.clientID, ' has joined'
         for client in clientsConnected:
