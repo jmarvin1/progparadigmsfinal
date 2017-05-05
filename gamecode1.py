@@ -14,6 +14,7 @@ class ServerConnection(Protocol):
         self.color= 0,0,0
         self.gs=None
         self.screen.fill(self.color)
+        self.dragging=False
         self.color = 255,0,0
         self.colorstring="red"
         reactor.callLater(.05, self.tick)
@@ -37,18 +38,23 @@ class ServerConnection(Protocol):
                 if event.key == pygame.K_y:
                     self.color = 255, 255, 0
                     self.colorstring="yellow"
+                if event.key == pygame.K_d:
+                    self.dragging=True
+                if event.key == pygame.K_s:
+                    self.dragging=False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y,z = self.color
-                #x=str(x).encode("UTF-8")
-                #y=str(y).encode('UTF-8')
-                #z=str(z).encode('UTF-8')
                 aa, bb = pygame.mouse.get_pos()
-                #aa=str(aa).encode('UTF-8')
-                #bb=str(bb).encode('UTF-8')
-               # self.transport.write("draw circle: "+x+","+y+","+z+":"+aa+","+bb+"\r\n")
-                string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)
+                string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
                 string=str.encode(string)
                 self.transport.write(string)
+#            if self.dragging:
+ #               if event.type == pygame.MOUSEMOTION:
+  #                  x,y,z=self.color
+   #                 aa, bb = pygame.mouse.get_pos()
+    #                string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
+     #               string=str.encode(string)
+      #              self.transport.write(string)
 
         pygame.display.flip()
         reactor.callLater(.05, self.tick)
@@ -75,6 +81,7 @@ class ServerConnection(Protocol):
         if lineList[0]=='draw circle':
             lineListX=lineList[2].split(',')[0]
             lineListY=lineList[2].split(',')[1]
+            lineListY=lineListY.split('\\')[0]
             newList=(int(lineListX), int(lineListY))
             print (newList)
             a=lineList[1].split(',')[0]
