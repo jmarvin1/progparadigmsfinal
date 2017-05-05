@@ -8,49 +8,83 @@ from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
 from itertools import count
 
+p1PORT=40043
+p2PORT=41043
+
 clientsConnected=[]
 numberOfClients=count(1)
 
-class ClientConnection(Protocol):
-    #def __init__(self, addr, connection):
-     #   self.addr=addr
-      #  self.connection=connection
+class P1Connection(Protocol):
+    def __init__(self, addr, connection):
+        self.addr=addr
+        self.connection=connection
+        self.connection.p1connected=self
 
     def connectionMade(self):
-        self.clientID=numberOfClients.next()
-        clientsConnected.append(self)
-        print 'client ', self.clientID, ' has joined'
-        for client in clientsConnected:
-            client.transport.write("client %s has joined\n" % (self.clientID,))
+        self.connection.p1connected=True
+        print 'p1 connected'
 
     def dataReceived(self, data):
-        print self.clientID, ' sent ', data.strip()
-        for client in clientsConnected:
-            client.transport.write("%s sent %s\n" % (self.clientID, data.rstrip()))
-            if data.strip()=='quit':
-                self.transport.loseConnection()
+        print 'data: ', data
+        self.connection.sendUpdate(data)
 
     def connectionLost(self, reason):
-        clientsConnected.remove(self)
-        print self.clientID, ' quit'
+        print 'p1 connection lost'
 
-class ClientConnectionFactory(Factory):
-    def __init__(self):
-        #self.connection=connection
-        self.myconn=ClientConnection()
+class P1ConnectionFactory(Factory):
+    def __init__(self, connection):
+        self.connection=connection
 
     def buildProtocol(self, addr):
-        #return ClientConnection(addr, self.connection)
-        return self.myconn
+        return P1Connection(addr, self.connection)
+
+class P2Connection(Protocol):
+    def __init__(self, addr, connection):
+        self.addr=addr
+        self.connection=connection
+        self.connection.p2connected=self
+
+    def connectionMade(self):
+        self.connection.p2connected=True
+        print 'p2 connected'
+
+    def dataReceived(self, data):
+        print 'data: ', data
+        self.connection.sendUpdate(data)
+
+    def connectionLost(self, reason):
+        print 'p2 connection lost'
+
+class P2ConnectionFactory(Factory):
+    def __init__(self, connection):
+        self.connection=connection
+
+    def buildProtocol(self, addr):
+        return P2Connection(addr, self.connection)
 
 #class for instantiating connection
 class Connections(object):
-    def run(self):
-        reactor.listenTCP(40043, ClientConnectionFactory(self))
-        reactor.run()
+    def __init__(self):
+        reactor.listenTCP(p1PORT, P1ConnectionFactory(self))
+        reactor.listenTCP(p2PORT, P2ConnectionFactory(self))
+        self.p1connection=None
+        self.p2connection=None
+        self.p1connected=False
+        self.p2connected=False
+
+    def sendUpdate(self, updateString):
+        try:
+            self.p1connection.transport.write(updateString+'\r\n')
+        except:
+            pass
+
+        try:
+            self.p2connection.transport.write(updateString+'\r\n')
+        except:
+            pass
 
 if __name__=='__main__':
-    #connection=Connections()
+    connection=Connections()
     #connection.run()
-    reactor.listenTCP(40043, ClientConnectionFactory())
+    #reactor.listenTCP(40043, ClientConnectionFactory())
     reactor.run()

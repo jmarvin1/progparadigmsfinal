@@ -8,7 +8,7 @@ import sys, pygame
 class ServerConnection(Protocol):
     def __init__(self):
         pygame.init()
-        pygaem.keys.set_repeat(1,30) #helps for drag feature
+        pygame.key.set_repeat(1,30) #helps for drag feature
         self.size=800,800
         self.screen= pygame.display.set_mode(self.size)
         self.color= 0,0,0
@@ -21,7 +21,7 @@ class ServerConnection(Protocol):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 reactor.stop()
-            if event.type == pygame.KEY_DOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
                     self.color = 0,255,0
                     self.colorstring="green"
@@ -37,7 +37,7 @@ class ServerConnection(Protocol):
                 if event.key == pygame.K_y:
                     self.color = 255, 255, 0
                     self.colorstring="yellow"
-            if event.type == pygame.MOUSE_BUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 self.transport.write("draw circle: "+self.color+":"+pygame.mouse.get_pos()+"\r\n")
 
         pygame.display.flip()
@@ -63,21 +63,11 @@ class ServerConnection(Protocol):
             pygame.draw_circle(self.screen,line[1],line[2],5,2)
 
 class ServerConnectionFactory(ClientFactory):
-    def __init__(self):
-        self.myconn=ServerConnection()
-        #self.connection=connection
-
     def buildProtocol(self, addr):
-        #return ServerConnection(addr, self.connection)
-        return self.myconn
-
-class Connections(object):
-    def run(self):
-        reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
-        reactor.run()
+        return ServerConnection()
 
 if __name__ == "__main__":
-    reactor.connectTCP("ash.campus.nd.edu", 40043, connection)
+    reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
     reactor.run()
 
 
