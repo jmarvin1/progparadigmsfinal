@@ -17,6 +17,9 @@ class ServerConnection(Protocol):
         self.dragging=False
         self.color = 255,0,0
         self.colorstring="red"
+        self.font = pygame.font.Font(None,24)
+        self.key= self.font.render("R-red G-green B-blue Y-yellow P-pink",1,(0,0,0))
+        self.screen.blit(self.key,(30, 100))
         reactor.callLater(.05, self.tick)
     def tick(self):
         for event in pygame.event.get():
