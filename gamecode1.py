@@ -39,8 +39,16 @@ class ServerConnection(Protocol):
                     self.colorstring="yellow"
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y,z = self.color
-                aa, bb = pygame.mouse_get_pos()
-                self.transport.write("draw circle: "+str(x)+","+str(y)+","+str(z)+":"+str(aa)+","+str(bb)+"\r\n")
+                x=str(x).encode("UTF-8")
+                y=str(y).encode('UTF-8')
+                z=str(z).encode('UTF-8')
+                aa, bb = pygame.mouse.get_pos()
+                aa=str(aa).encode('UTF-8')
+                bb=str(bb).encode('UTF-8')
+               # self.transport.write("draw circle: "+x+","+y+","+z+":"+aa+","+bb+"\r\n")
+                string='draw circle: 255,0,0:400,400\r\n'
+                string=str.encode(string)
+                self.transport.write(string)
 
         pygame.display.flip()
         reactor.callLater(.05, self.tick)

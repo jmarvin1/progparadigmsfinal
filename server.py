@@ -18,7 +18,7 @@ class P1Connection(Protocol):
     def __init__(self, addr, connection):
         self.addr=addr
         self.connection=connection
-        self.connection.p1connected=self
+        self.connection.p1connection=self
 
     def connectionMade(self):
         self.connection.p1connected=True
@@ -42,7 +42,7 @@ class P2Connection(Protocol):
     def __init__(self, addr, connection):
         self.addr=addr
         self.connection=connection
-        self.connection.p2connected=self
+        self.connection.p2connection=self
 
     def connectionMade(self):
         self.connection.p2connected=True
@@ -73,15 +73,16 @@ class Connections(object):
         self.p2connected=False
 
     def sendUpdate(self, updateString):
-        try:
-            self.p1connection.transport.write(updateString+'\r\n')
-        except:
-            pass
+        print updateString
+       # try:
+        self.p1connection.transport.write(updateString)
+       # except:
+        #    pass
 
-        try:
-            self.p2connection.transport.write(updateString+'\r\n')
-        except:
-            pass
+        #try:
+         #   self.p2connection.transport.write(updateString)
+        #except:
+         #   pass
 
 if __name__=='__main__':
     connection=Connections()
