@@ -73,14 +73,14 @@ class Connections(object):
         self.p2connected=False
 
     def sendUpdate(self, updateString):
-        print updateString
+        #print updateString
        # try:
         self.p1connection.transport.write(updateString)
        # except:
         #    pass
 
         #try:
-         #   self.p2connection.transport.write(updateString)
+        self.p2connection.transport.write(updateString)
         #except:
          #   pass
 

@@ -39,12 +39,12 @@ class ServerConnection(Protocol):
                     self.colorstring="yellow"
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y,z = self.color
-                #x=str(x).encode("UTF-8")
-                #y=str(y).encode('UTF-8')
-                #z=str(z).encode('UTF-8')
+#                x=str(x).encode("UTF-8")
+ #               y=str(y).encode('UTF-8')
+  #              z=str(z).encode('UTF-8')
                 aa, bb = pygame.mouse.get_pos()
-                #aa=str(aa).encode('UTF-8')
-                #bb=str(bb).encode('UTF-8')
+   #             aa=str(aa).encode('UTF-8')
+    #            bb=str(bb).encode('UTF-8')
                # self.transport.write("draw circle: "+x+","+y+","+z+":"+aa+","+bb+"\r\n")
                 string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)
                 string=str.encode(string)
@@ -54,7 +54,7 @@ class ServerConnection(Protocol):
         reactor.callLater(.05, self.tick)
 
     def connectionMade(self):
-        print( 'connection made')
+        print( 'connection made 2')
 
     #def dataReceived(self, data):
      #   print( 'data: ', data)
@@ -90,6 +90,6 @@ class ServerConnectionFactory(ClientFactory):
         return ServerConnection()
 
 if __name__ == "__main__":
-    reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
+    reactor.connectTCP("ash.campus.nd.edu", 41043, ServerConnectionFactory())
     reactor.run()
 
