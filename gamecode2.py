@@ -4,7 +4,18 @@ from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 from twisted.protocols.basic import LineReceiver
 import sys, pygame
-
+import os
+'''
+def load_image(name):
+    fullname=os.path.join('images', name)
+    try:
+        image=pygame.image.load(fullname)
+    except pygame.error:
+        print ('cannot load image: ', name)
+        raise SystemExit
+    image=image.convert()
+    return image, image.get_rect()
+'''
 class ServerConnection(Protocol):
     def __init__(self):
         pygame.init()
@@ -17,6 +28,15 @@ class ServerConnection(Protocol):
         self.screen.fill(self.color)
         self.color = 255,0,0
         self.colorstring="red"
+        self.font=pygame.font.Font(None, 24)
+        self.key=self.font.render("R-red G-green B-blue Y-yellow P-pink", 1, (255,255,255))
+        self.screen.blit(self.key, (30,10))
+        pygame.sprite.Sprite.__init__(self)
+        self.image=pygame.image.load('images/smiley-face-clip-art-dr-odd-uWlQ3w-clipart.jpg')
+        self.rect=self.image.get_rect()
+        self.rect.x=300
+        self.rect.y=50
+        self.screen.blit(self.image, self.rect)
         reactor.callLater(.05, self.tick)
     def tick(self):
         for event in pygame.event.get():
@@ -92,9 +112,13 @@ class ServerConnection(Protocol):
 #print (tuple(lineList[1]))
             pygame.draw.circle(self.screen,colorList,newList,5,2)
 
+
+
 class ServerConnectionFactory(ClientFactory):
     def buildProtocol(self, addr):
         return ServerConnection()
+
+
 
 if __name__ == "__main__":
     reactor.connectTCP("ash.campus.nd.edu", 41043, ServerConnectionFactory())
