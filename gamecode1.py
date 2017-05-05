@@ -56,8 +56,8 @@ class ServerConnection(Protocol):
     def connectionMade(self):
         print( 'connection made')
 
-    def dataReceived(self, data):
-        print( 'data: ', data)
+    #def dataReceived(self, data):
+     #   print( 'data: ', data)
 
     def connectionLost(self, reasonForDisconnect):
         print('connection lost-reason: ', reasonForDisconnect)
@@ -66,7 +66,7 @@ class ServerConnection(Protocol):
         except:
             pass
 
-    def lineReceived(self, line):
+    def dataReceived(self, line):
         print('line received')
         line.split(':')
         if line[0]=='draw circle':
