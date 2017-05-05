@@ -38,7 +38,7 @@ class ServerConnection(Protocol):
                     self.color = 255, 255, 0
                     self.colorstring="yellow"
             if event.type == pygame.MOUSEBUTTONDOWN:
-                self.transport.write("draw circle: "+self.color+":"+pygame.mouse.get_pos()+"\r\n")
+                self.transport.write("draw circle: "+','.join(self.color)+":"+','.join(pygame.mouse.get_pos())+"\r\n")
 
         pygame.display.flip()
         reactor.callLater(.05, self.tick)
@@ -60,7 +60,7 @@ class ServerConnection(Protocol):
         print('line received')
         line.split(':')
         if line[0]=='draw circle':
-            pygame.draw_circle(self.screen,line[1],line[2],5,2)
+            pygame.draw_circle(self.screen,tuple(line[1]),tuple(line[2]),5,2)
 
 class ServerConnectionFactory(ClientFactory):
     def buildProtocol(self, addr):
