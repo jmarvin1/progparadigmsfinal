@@ -2,6 +2,7 @@ from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
+from twisted.protocols.basic import LineReceiver
 import sys, pygame
 import math
 
@@ -30,7 +31,7 @@ class gameSpace(object):
                 #self.ship.move(event)
                 if event.key == pygame.K_g:
                     self.color= 0,255,0
-                    self.connection.transport.write('green\n')
+                    self.connection.sendLine('green')
                 if event.key == pygame.K_b:
                     self.color = 0,0,255
                 if event.key == pygame.K_r:
@@ -72,6 +73,9 @@ class ServerConnection(Protocol):
             reactor.stop()
         except:
             pass
+
+    def lineReceived(self, line):
+        print(line)
 
 class ServerConnectionFactory(ClientFactory):
     def __init__(self):
