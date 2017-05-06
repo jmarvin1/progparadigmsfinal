@@ -1,2 +1,2 @@
 # progparadigmsfinal
-programmingparadimgs final 
+Our game provides two users the opportunity to collaboratively draw given pictures. The game provides pressure on the users to perform by giving a limited timer for each picture. Whatever is drawn by one user is displayed on both screens. This works by sending the commands up to the server and then back down to both users. We allow users to select 5 different colors (Red, Blue, Green, Yellow, Pink) with the keys (R, B, G, Y, P). To draw a point on the screen you simply mouse click on the spot you want the point to be drawn.  
