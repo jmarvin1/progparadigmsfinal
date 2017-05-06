@@ -8,12 +8,11 @@ from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
 from itertools import count
 
+#Player ports on ash
 p1PORT=40043
 p2PORT=41043
 
-clientsConnected=[]
-numberOfClients=count(1)
-
+#Player 1 Client Connection Class
 class P1Connection(Protocol):
     def __init__(self, addr, connection):
         self.addr=addr
@@ -31,6 +30,7 @@ class P1Connection(Protocol):
     def connectionLost(self, reason):
         print 'p1 connection lost'
 
+#Player 1 Client Connection Class Factory
 class P1ConnectionFactory(Factory):
     def __init__(self, connection):
         self.connection=connection
@@ -38,6 +38,7 @@ class P1ConnectionFactory(Factory):
     def buildProtocol(self, addr):
         return P1Connection(addr, self.connection)
 
+#Player 2 Client Connection Class
 class P2Connection(Protocol):
     def __init__(self, addr, connection):
         self.addr=addr
@@ -55,6 +56,7 @@ class P2Connection(Protocol):
     def connectionLost(self, reason):
         print 'p2 connection lost'
 
+#Player 2 Client Connection Class Factory
 class P2ConnectionFactory(Factory):
     def __init__(self, connection):
         self.connection=connection
@@ -72,8 +74,8 @@ class Connections(object):
         self.p1connected=False
         self.p2connected=False
 
+    #used to update the screens of both players when one player causes an event
     def sendUpdate(self, updateString):
-        #print updateString
         try:
             self.p1connection.transport.write(updateString)
         except:
@@ -86,6 +88,4 @@ class Connections(object):
 
 if __name__=='__main__':
     connection=Connections()
-    #connection.run()
-    #reactor.listenTCP(40043, ClientConnectionFactory())
     reactor.run()

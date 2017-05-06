@@ -1,3 +1,8 @@
+#Rachael Mullin and James Marvin
+#Programming Paradigms Final Project
+#Due: May 10, 2017
+#gamecode1.py
+
 from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
@@ -7,64 +12,63 @@ import sys, pygame
 import time
 import os
 
-'''
-def load_image(name):
-    fullname=os.path.join('images', name)
-    try:
-        image=pygame.image.load(fullname)
-    except pygame.error:
-        print ('cannot load image: ', name)
-        raise SystemExit
-    image=image.convert()
-    return image, image.get_rect()
-'''
+#Player 1's Server Connection Class
 class ServerConnection(Protocol):
     def __init__(self):
+        #initializing screen
         pygame.init()
-        pygame.key.set_repeat(1,30) #helps for drag feature
+        pygame.key.set_repeat(1,30) 
         self.size=800,800
         self.screen= pygame.display.set_mode(self.size)
         self.color= 0,0,0
-        self.gs=None
         self.screen.fill(self.color)
-        self.dragging=False
+
+        #initialize drawing color
         self.color = 255,0,0
-        self.colorstring="red"
+
+        #initialize game key
         self.font = pygame.font.Font(None,24)
         self.key= self.font.render("R-red G-green B-blue Y-yellow P-pink",1,(255,255,255))
         self.screen.blit(self.key,(30, 10))
-        #pygame.sprite.Sprite.__init__(self)
+
+        #initialize first image
         self.image=pygame.image.load('images/smiley-face-clip-art-dr-odd-uWlQ3w-clipart.jpg')
         self.rect=self.image.get_rect()
         self.rect.x=300
         self.rect.y=50
         self.screen.blit(self.image, self.rect)
-        self.firstImageTime=30
+        self.firstImageTime=30 #first image timer
         self.timer=self.firstImageTime
-        self.secondImageTime=60
-        self.thirdImageTime=90
-        self.start_ticks=pygame.time.get_ticks()
-        self.gameOver=self.font.render("Game over! Thanks for playing!", 1, (255,255,255))
+        self.secondImageTime=60 #second image timer
+        self.thirdImageTime=90 #third image timer
+        self.start_ticks=pygame.time.get_ticks() #used for countdown calculation
+
+        self.gameOver=self.font.render("Game over! Thanks for playing!", 1, (255,255,255)) #displayed to user upon game over
+
+        #countdown display
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
         self.seconds=0
         self.secondsPassed=self.timer
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
-        self.p2hasConnected=False
         self.counter=0;
+        self.p2hasConnected=False #to know if player 2 has connected
         reactor.callLater(.05, self.tick)
     def tick(self):
+        #timer calculation
         self.secondsPassed=int((pygame.time.get_ticks()-self.start_ticks)/1000)
         self.seconds=self.timer-self.secondsPassed
+        #sends player 1's timer to player 2 so both have same time on countdown:
         if (self.counter==0 and self.p2hasConnected==True):
             secondsString=str.encode(str(pygame.time.get_ticks()))
             self.transport.write(secondsString)
             self.counter=1
+        #updates countdown
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
         if self.seconds<0:
-            if self.timer==self.firstImageTime:
+            if self.timer==self.firstImageTime: #displays next image when first countdown ends
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.key,(30,10))
                 self.image=pygame.image.load('images/ndlogo.png')
@@ -72,7 +76,7 @@ class ServerConnection(Protocol):
                 self.timer=self.secondImageTime
                 self.seconds=0
                 self.start_ticks=self.start_ticks+30000
-            elif self.timer==self.secondImageTime:
+            elif self.timer==self.secondImageTime: #displays next image when second countdown ends
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.key,(30,10))
                 self.image=pygame.image.load('images/160px-Mona_Lisa.PNG')
@@ -80,18 +84,13 @@ class ServerConnection(Protocol):
                 self.timer=self.thirdImageTime
                 self.seconds=0
                 self.start_ticks=self.start_ticks+60000
-            else:
+            else: #displays game over when third countdown ends
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.gameOver,(400,400))
-#                pygame.time.delay(5000)
-  #              self.screen.fill((0,0,0))
- #               self.screen.blit(self.gameOver,(400,400))
-  #              pygame.time.delay(5000)
-   #             reactor.stop()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for event in pygame.event.get(): 
+            if event.type == pygame.QUIT: #if player quits, stop connection
                 reactor.stop()
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN: #gets key press events to change color
                 if event.key == pygame.K_g:
                     self.color = 0,255,0
                     self.colorstring="green"
@@ -107,49 +106,32 @@ class ServerConnection(Protocol):
                 if event.key == pygame.K_y:
                     self.color = 255, 255, 0
                     self.colorstring="yellow"
-                if event.key == pygame.K_d:
+                if event.key == pygame.K_d: #allows user to draw when pressing d key
                     x,y,z = self.color
-                    aa, bb = pygame.mouse.get_pos()
+                    aa, bb = pygame.mouse.get_pos() #draws circle at specific mouse position
                     string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
                     string=str.encode(string)
-                    self.transport.write(string)
-#                    self.dragging=True
-  #              if event.key == pygame.K_s:
- #                   self.dragging=False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.transport.write(string) #updates drawn circle for both players
+            if event.type == pygame.MOUSEBUTTONDOWN: #allows user to draw when clicking mouse
                 x,y,z = self.color
-                aa, bb = pygame.mouse.get_pos()
+                aa, bb = pygame.mouse.get_pos() #draws circle at specific mouse position
                 string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
                 string=str.encode(string)
-                self.transport.write(string)
-#            if self.dragging:
- #               if event.type == pygame.MOUSEMOTION:
-  #                  x,y,z=self.color
-   #                 aa, bb = pygame.mouse.get_pos()
-    #                string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
-     #               string=str.encode(string)
-      #              self.transport.write(string)
-
+                self.transport.write(string) #updates drawn circle for both players
         pygame.display.flip()
-        reactor.callLater(.05, self.tick)
+        reactor.callLater(.05, self.tick) #instead of while loop, used with twisted
 
-    def connectionMade(self):
+    def connectionMade(self): #when player connects
         print( 'connection made')
 
-    #def dataReceived(self, data):
-     #   print( 'data: ', data)
-
-    def connectionLost(self, reasonForDisconnect):
+    def connectionLost(self, reasonForDisconnect): #when player disconnects
         print('connection lost-reason: ', reasonForDisconnect)
         try:
             reactor.stop()
         except:
             pass
 
-    def dataReceived(self, line):
-#        print (line)
- #       if line.decode()=='connection made 2\r\n':
-  #          self.p2hasConnected=True
+    def dataReceived(self, line): #parses data to draw circle in correct position, also checks if player 2 has connected
         try:
             print('line received')
             lineList=line.decode().split(':')
@@ -171,13 +153,12 @@ class ServerConnection(Protocol):
         except:
             self.p2hasConnected=True
 
-
+#Player 1 server connection factory
 class ServerConnectionFactory(ClientFactory):
     def buildProtocol(self, addr):
         return ServerConnection()
 
-
-
+#connects to player 1 port on ash
 if __name__ == "__main__":
     reactor.connectTCP("ash.campus.nd.edu", 40043, ServerConnectionFactory())
     reactor.run()
