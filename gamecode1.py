@@ -50,10 +50,16 @@ class ServerConnection(Protocol):
         self.secondsPassed=self.timer
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
+        self.p2hasConnected=False
+        self.counter=0;
         reactor.callLater(.05, self.tick)
     def tick(self):
-        self.secondsPassed=(pygame.time.get_ticks()-self.start_ticks)/1000
+        self.secondsPassed=int((pygame.time.get_ticks()-self.start_ticks)/1000)
         self.seconds=self.timer-self.secondsPassed
+        if (self.counter==0 and self.p2hasConnected==True):
+            secondsString=str.encode(str(pygame.time.get_ticks()))
+            self.transport.write(secondsString)
+            self.counter=1
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
@@ -77,8 +83,11 @@ class ServerConnection(Protocol):
             else:
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.gameOver,(400,400))
-                pygame.time.delay(2000)
-                reactor.stop()
+#                pygame.time.delay(5000)
+  #              self.screen.fill((0,0,0))
+ #               self.screen.blit(self.gameOver,(400,400))
+  #              pygame.time.delay(5000)
+   #             reactor.stop()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 reactor.stop()
@@ -99,9 +108,14 @@ class ServerConnection(Protocol):
                     self.color = 255, 255, 0
                     self.colorstring="yellow"
                 if event.key == pygame.K_d:
-                    self.dragging=True
-                if event.key == pygame.K_s:
-                    self.dragging=False
+                    x,y,z = self.color
+                    aa, bb = pygame.mouse.get_pos()
+                    string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
+                    string=str.encode(string)
+                    self.transport.write(string)
+#                    self.dragging=True
+  #              if event.key == pygame.K_s:
+ #                   self.dragging=False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y,z = self.color
                 aa, bb = pygame.mouse.get_pos()
@@ -133,26 +147,29 @@ class ServerConnection(Protocol):
             pass
 
     def dataReceived(self, line):
-        print('line received')
-        lineList=line.decode().split(':')
-        print (lineList[0])
-        print (lineList[1])
-        print (lineList[2][0])
-        if lineList[0]=='draw circle':
-            lineListX=lineList[2].split(',')[0]
-            lineListY=lineList[2].split(',')[1]
-            lineListY=lineListY.split('\\')[0]
-            newList=(int(lineListX), int(lineListY))
-            print (newList)
-            a=lineList[1].split(',')[0]
-            b=lineList[1].split(',')[1]
-            c=lineList[1].split(',')[2]
-            colorList=(int(a), int(b), int(c))
-            print (colorList)
-#print (tuple(lineList[1]))
-            pygame.draw.circle(self.screen,colorList,newList,5,0)
-
-
+#        print (line)
+ #       if line.decode()=='connection made 2\r\n':
+  #          self.p2hasConnected=True
+        try:
+            print('line received')
+            lineList=line.decode().split(':')
+            print (lineList[0])
+            print (lineList[1])
+            print (lineList[2][0])
+            if lineList[0]=='draw circle':
+                lineListX=lineList[2].split(',')[0]
+                lineListY=lineList[2].split(',')[1]
+                lineListY=lineListY.split('\\')[0]
+                newList=(int(lineListX), int(lineListY))
+                print (newList)
+                a=lineList[1].split(',')[0]
+                b=lineList[1].split(',')[1]
+                c=lineList[1].split(',')[2]
+                colorList=(int(a), int(b), int(c))
+                print (colorList)
+                pygame.draw.circle(self.screen,colorList,newList,5,0)
+        except:
+            self.p2hasConnected=True
 
 
 class ServerConnectionFactory(ClientFactory):

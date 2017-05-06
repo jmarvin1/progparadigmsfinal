@@ -45,16 +45,19 @@ class ServerConnection(Protocol):
         self.start_ticks=pygame.time.get_ticks()
         self.gameOver=self.font.render("Game over! Thanks for playing!", 1, (255,255,255))
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
-        self.seconds=self.timer
-        self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
-        self.screen.blit(self.secondsLabel,(715,15))
+        self.seconds=0
+        self.secondsPassed=self.timer
+        self.getTicks=0
+ #       self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
+ #       self.screen.blit(self.secondsLabel,(715,15))
         reactor.callLater(.05, self.tick)
     def tick(self):
-        self.seconds=(pygame.time.get_ticks()-self.start_ticks)/1000
+        self.secondsPassed=int((self.getTicks+pygame.time.get_ticks()-self.start_ticks)/1000)
+        self.seconds=self.timer-self.secondsPassed
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
-        if self.seconds>self.timer:
+        if self.seconds<0:
             if self.timer==self.firstImageTime:
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.key, (30,10))
@@ -62,7 +65,7 @@ class ServerConnection(Protocol):
                 self.screen.blit(self.image,self.rect)
                 self.timer=self.secondImageTime
                 self.seconds=0
-                self.start_ticks=0
+                self.start_ticks=self.start_ticks+30000
             elif self.timer==self.secondImageTime:
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.key, (30,10))
@@ -70,12 +73,10 @@ class ServerConnection(Protocol):
                 self.screen.blit(self.image,self.rect)
                 self.timer=self.thirdImageTime
                 self.seconds=0
-                self.start_ticks=0
+                self.start_ticks=self.start_ticks+60000
             else:
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.gameOver,(400,400))
-                pygame.time.delay(2000)
-                reactor.stop()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 reactor.stop()
@@ -118,6 +119,9 @@ class ServerConnection(Protocol):
 
     def connectionMade(self):
         print( 'connection made 2')
+        string='connection made 2'+'\r\n'
+        string=str.encode(string)
+        self.transport.write(string)
 
     #def dataReceived(self, data):
      #   print( 'data: ', data)
@@ -130,7 +134,10 @@ class ServerConnection(Protocol):
             pass
 
     def dataReceived(self, line):
-        
+        #try:
+         #   line=int(line)
+          #  self.seconds=line
+        try:
             print('line received')
             lineList=line.decode().split(':')
             print (lineList[0])
@@ -149,10 +156,14 @@ class ServerConnection(Protocol):
                 print (colorList)
             pygame.draw.circle(self.screen,colorList,newList,5,0)
         except:
-            self.secondsLabel=self.font.render(line, 1, (255, 255, 255))
-            self.screen.blit(self.secondsLabel, (715, 15))
-
-
+         #   self.secondsLabel=self.font.render(line, 1, (255, 255, 255))
+          #  self.screen.blit(self.secondsLabel, (715, 15))
+            try:
+                line=line.decode()
+                self.getTicks=int(line)
+                print ('self.getTicks:', self.getTicks)
+            except:
+                pass
 
 
 class ServerConnectionFactory(ClientFactory):

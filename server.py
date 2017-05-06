@@ -74,15 +74,15 @@ class Connections(object):
 
     def sendUpdate(self, updateString):
         #print updateString
-       # try:
-        self.p1connection.transport.write(updateString)
-       # except:
-        #    pass
+        try:
+            self.p1connection.transport.write(updateString)
+        except:
+            pass
 
-        #try:
-        self.p2connection.transport.write(updateString)
-        #except:
-         #   pass
+        try:
+            self.p2connection.transport.write(updateString)
+        except:
+            pass
 
 if __name__=='__main__':
     connection=Connections()
