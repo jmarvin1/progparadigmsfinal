@@ -5,6 +5,8 @@ from twisted.internet.task import LoopingCall
 from twisted.protocols.basic import LineReceiver
 import sys, pygame
 import os
+import time
+
 '''
 def load_image(name):
     fullname=os.path.join('images', name)
@@ -31,14 +33,49 @@ class ServerConnection(Protocol):
         self.font=pygame.font.Font(None, 24)
         self.key=self.font.render("R-red G-green B-blue Y-yellow P-pink", 1, (255,255,255))
         self.screen.blit(self.key, (30,10))
-        pygame.sprite.Sprite.__init__(self)
         self.image=pygame.image.load('images/smiley-face-clip-art-dr-odd-uWlQ3w-clipart.jpg')
         self.rect=self.image.get_rect()
         self.rect.x=300
         self.rect.y=50
         self.screen.blit(self.image, self.rect)
+        self.firstImageTime=30
+        self.timer=self.firstImageTime
+        self.secondImageTime=60
+        self.thirdImageTime=90
+        self.start_ticks=pygame.time.get_ticks()
+        self.gameOver=self.font.render("Game over! Thanks for playing!", 1, (255,255,255))
+        self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
+        self.seconds=self.timer
+        self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
+        self.screen.blit(self.secondsLabel,(715,15))
         reactor.callLater(.05, self.tick)
     def tick(self):
+        self.seconds=(pygame.time.get_ticks()-self.start_ticks)/1000
+        self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
+        self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
+        self.screen.blit(self.secondsLabel,(715,15))
+        if self.seconds>self.timer:
+            if self.timer==self.firstImageTime:
+                self.screen.fill((0,0,0))
+                self.screen.blit(self.key, (30,10))
+                self.image=pygame.image.load('images/ndlogo.png')
+                self.screen.blit(self.image,self.rect)
+                self.timer=self.secondImageTime
+                self.seconds=0
+                self.start_ticks=0
+            elif self.timer==self.secondImageTime:
+                self.screen.fill((0,0,0))
+                self.screen.blit(self.key, (30,10))
+                self.image=pygame.image.load('images/160px-Mona_Lisa.PNG')
+                self.screen.blit(self.image,self.rect)
+                self.timer=self.thirdImageTime
+                self.seconds=0
+                self.start_ticks=0
+            else:
+                self.screen.fill((0,0,0))
+                self.screen.blit(self.gameOver,(400,400))
+                pygame.time.delay(2000)
+                reactor.stop()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 reactor.stop()
@@ -110,7 +147,7 @@ class ServerConnection(Protocol):
             colorList=(int(a), int(b), int(c))
             print (colorList)
 #print (tuple(lineList[1]))
-            pygame.draw.circle(self.screen,colorList,newList,5,2)
+            pygame.draw.circle(self.screen,colorList,newList,5,0)
 
 
 
