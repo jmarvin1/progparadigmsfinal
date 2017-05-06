@@ -1,3 +1,4 @@
+#James Marvin (jmarvin1) Rachael Mullin (rmullin)
 from twisted.internet.protocol import ClientFactory
 from twisted.internet.protocol import Protocol
 from twisted.internet import reactor
@@ -6,38 +7,30 @@ from twisted.protocols.basic import LineReceiver
 import sys, pygame
 import os
 import time
-
-'''
-def load_image(name):
-    fullname=os.path.join('images', name)
-    try:
-        image=pygame.image.load(fullname)
-    except pygame.error:
-        print ('cannot load image: ', name)
-        raise SystemExit
-    image=image.convert()
-    return image, image.get_rect()
-'''
+#create connection 
 class ServerConnection(Protocol):
     def __init__(self):
-        pygame.init()
+        pygame.init() #starts up pygame
         pygame.key.set_repeat(1,30) #helps for drag feature
         self.size=800,800
         self.screen= pygame.display.set_mode(self.size)
         self.dragging=False
         self.color= 0,0,0
-        self.gs=None
+        #fill the screen with black
         self.screen.fill(self.color)
         self.color = 255,0,0
         self.colorstring="red"
+        #create the key
         self.font=pygame.font.Font(None, 24)
         self.key=self.font.render("R-red G-green B-blue Y-yellow P-pink", 1, (255,255,255))
         self.screen.blit(self.key, (30,10))
+        #load the first image
         self.image=pygame.image.load('images/smiley-face-clip-art-dr-odd-uWlQ3w-clipart.jpg')
         self.rect=self.image.get_rect()
         self.rect.x=300
         self.rect.y=50
         self.screen.blit(self.image, self.rect)
+        #initialize time variables
         self.firstImageTime=30
         self.timer=self.firstImageTime
         self.secondImageTime=60
@@ -48,12 +41,11 @@ class ServerConnection(Protocol):
         self.seconds=0
         self.secondsPassed=self.timer
         self.getTicks=0
- #       self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
- #       self.screen.blit(self.secondsLabel,(715,15))
         reactor.callLater(.05, self.tick)
-    def tick(self):
+    def tick(self): #function checking game conditions
         self.secondsPassed=int((self.getTicks+pygame.time.get_ticks()-self.start_ticks)/1000)
         self.seconds=self.timer-self.secondsPassed
+        #display time on screen
         self.countdownRect=pygame.draw.rect(self.screen, (0,0,0), (700,10,100,100), 0)
         self.secondsLabel=self.font.render(str(self.seconds), 1, (255,255,255))
         self.screen.blit(self.secondsLabel,(715,15))
@@ -77,55 +69,44 @@ class ServerConnection(Protocol):
             else:
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.gameOver,(400,400))
-        for event in pygame.event.get():
+        #handle events
+        for event in pygame.event.get(): #key event
             if event.type == pygame.QUIT:
                 reactor.stop()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_g:
                     self.color = 0,255,0
-                    self.colorstring="green"
                 if event.key == pygame.K_b:
                     self.color = 0,0,255
-                    self.colorstring="blue"
                 if event.key == pygame.K_r:
                     self.color = 255, 0, 0
-                    self.colorstring = "red"
                 if event.key == pygame.K_p:
                     self.color = 254, 143, 194
-                    self.colorstring="pink"
                 if event.key == pygame.K_y:
                     self.color = 255, 255, 0
-                    self.colorstring="yellow"
                 if event.key == pygame.K_d:
-                    self.dragging=True
-                if event.key == pygame.K_s:
-                    self.dragging=False
-            if event.type == pygame.MOUSEBUTTONDOWN:
+                    x,y,z = self.color
+                    aa, bb = pygame.mouse.get_pos()
+                    string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
+                    string =str.encode(string)
+                    self.transport.write(string)
+            if event.type == pygame.MOUSEBUTTONDOWN: #mouse button event
                 x,y,z = self.color
                 aa, bb = pygame.mouse.get_pos()
                 string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
                 string=str.encode(string)
                 self.transport.write(string)
-#            if self.dragging:
- #               if event.type ==pygame.MOUSEMOTION:
-  #                  x,y,z=self.color
-   #                 aa, bb = pygame.mouse.get_pos()
-    #                string='draw circle:'+str(x)+','+str(y)+','+str(z)+':'+str(aa)+','+str(bb)+'\r\n'
-     #               string=str.encode(string)
-      #              self.transport.write(string)
 
         pygame.display.flip()
         reactor.callLater(.05, self.tick)
-
+    #indicate to the server that player 2 has joined the game
     def connectionMade(self):
         print( 'connection made 2')
         string='connection made 2'+'\r\n'
         string=str.encode(string)
         self.transport.write(string)
 
-    #def dataReceived(self, data):
-     #   print( 'data: ', data)
-
+    #report connection losses and the reason for the loss
     def connectionLost(self, reasonForDisconnect):
         print('connection lost-reason: ', reasonForDisconnect)
         try:
@@ -133,11 +114,9 @@ class ServerConnection(Protocol):
         except:
             pass
 
+    #handle data recieved from the server
     def dataReceived(self, line):
-        #try:
-         #   line=int(line)
-          #  self.seconds=line
-        try:
+        try: #drawing a point
             print('line received')
             lineList=line.decode().split(':')
             print (lineList[0])
@@ -156,9 +135,7 @@ class ServerConnection(Protocol):
                 print (colorList)
             pygame.draw.circle(self.screen,colorList,newList,5,0)
         except:
-         #   self.secondsLabel=self.font.render(line, 1, (255, 255, 255))
-          #  self.screen.blit(self.secondsLabel, (715, 15))
-            try:
+            try: #get time from player 1
                 line=line.decode()
                 self.getTicks=int(line)
                 print ('self.getTicks:', self.getTicks)
