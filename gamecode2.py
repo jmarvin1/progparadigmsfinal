@@ -130,24 +130,28 @@ class ServerConnection(Protocol):
             pass
 
     def dataReceived(self, line):
-        print('line received')
-        lineList=line.decode().split(':')
-        print (lineList[0])
-        print (lineList[1])
-        print (lineList[2][0])
-        if lineList[0]=='draw circle':
-            lineListX=lineList[2].split(',')[0]
-            lineListY=lineList[2].split(',')[1]
-            lineListY=lineListY.split('\\')[0]
-            newList=(int(lineListX), int(lineListY))
-            print (newList)
-            a=lineList[1].split(',')[0]
-            b=lineList[1].split(',')[1]
-            c=lineList[1].split(',')[2]
-            colorList=(int(a), int(b), int(c))
-            print (colorList)
-#print (tuple(lineList[1]))
+        
+            print('line received')
+            lineList=line.decode().split(':')
+            print (lineList[0])
+            print (lineList[1])
+            print (lineList[2][0])
+            if lineList[0]=='draw circle':
+                lineListX=lineList[2].split(',')[0]
+                lineListY=lineList[2].split(',')[1]
+                lineListY=lineListY.split('\\')[0]
+                newList=(int(lineListX), int(lineListY))
+                print (newList)
+                a=lineList[1].split(',')[0]
+                b=lineList[1].split(',')[1]
+                c=lineList[1].split(',')[2]
+                colorList=(int(a), int(b), int(c))
+                print (colorList)
             pygame.draw.circle(self.screen,colorList,newList,5,0)
+        except:
+            self.secondsLabel=self.font.render(line, 1, (255, 255, 255))
+            self.screen.blit(self.secondsLabel, (715, 15))
+
 
 
 
